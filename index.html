@@ -1,247 +1,505 @@
+
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบเปิดเพลงเทคนิคเชียงคำอัตโนมัติ (Music Auto-Player Dashboard)</title>
-    <!-- Google Fonts: Inter, Sarabun, & Outfit -->
+    <!-- Google Fonts: Outfit (English numbers/headings) & Sarabun (Thai readability) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg-color: #f1f5f9; /* Slate 100 */
-            --card-bg: rgba(255, 255, 255, 0.9);
-            --accent-color: #6366f1; /* Indigo 500 */
-            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
-            --text-main: #1e293b; /* Slate 800 */
-            --text-muted: #64748b; /* Slate 500 */
-            --border-color: rgba(0, 0, 0, 0.05);
+            /* Dark Theme Colors (Default) */
+            --bg-main: #080b11;
+            --bg-gradient: radial-gradient(circle at 50% -20%, #17182f 0%, #080b11 100%);
+            --card-bg: rgba(17, 22, 37, 0.7);
+            --card-border: rgba(255, 255, 255, 0.06);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --accent-color: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --accent-gradient: linear-gradient(135deg, #818cf8 0%, #6366f1 50%, #4f46e5 100%);
+            
             --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.2);
             --warning: #f59e0b;
+            --warning-glow: rgba(245, 158, 11, 0.2);
             --info: #3b82f6;
-            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
-            --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 12px 40px rgba(99, 102, 241, 0.08);
+            --info-glow: rgba(59, 130, 246, 0.2);
+            --error: #ef4444;
+            --error-glow: rgba(239, 68, 68, 0.2);
+            
+            --input-bg: rgba(15, 20, 35, 0.6);
+            --input-bg-focus: rgba(15, 20, 35, 0.9);
+            --input-border: rgba(255, 255, 255, 0.08);
+            --item-bg: rgba(255, 255, 255, 0.02);
+            --item-border: rgba(255, 255, 255, 0.04);
+            --item-hover: rgba(255, 255, 255, 0.05);
+            --shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+            --scrollbar-thumb: rgba(255, 255, 255, 0.15);
+            --scrollbar-track: rgba(255, 255, 255, 0.02);
+            --glass-blur: blur(16px);
+        }
+
+        [data-theme="light"] {
+            /* Light Theme Colors */
+            --bg-main: #f1f5f9;
+            --bg-gradient: radial-gradient(circle at 50% -20%, #e0e7ff 0%, #f1f5f9 100%);
+            --card-bg: rgba(255, 255, 255, 0.75);
+            --card-border: rgba(0, 0, 0, 0.06);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --accent-color: #4f46e5;
+            --accent-glow: rgba(79, 70, 229, 0.15);
+            --accent-gradient: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+            
+            --success: #059669;
+            --success-glow: rgba(5, 150, 105, 0.15);
+            --warning: #d97706;
+            --warning-glow: rgba(217, 119, 6, 0.15);
+            --info: #2563eb;
+            --info-glow: rgba(37, 99, 235, 0.15);
+            --error: #dc2626;
+            --error-glow: rgba(220, 38, 38, 0.15);
+            
+            --input-bg: rgba(255, 255, 255, 0.9);
+            --input-bg-focus: #ffffff;
+            --input-border: rgba(0, 0, 0, 0.08);
+            --item-bg: rgba(0, 0, 0, 0.02);
+            --item-border: rgba(0, 0, 0, 0.03);
+            --item-hover: rgba(255, 255, 255, 0.9);
+            --shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.08);
+            --scrollbar-thumb: rgba(0, 0, 0, 0.15);
+            --scrollbar-track: rgba(0, 0, 0, 0.02);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         body {
-            font-family: 'Outfit', 'Sarabun', 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.05) 0px, transparent 50%);
-            color: var(--text-main);
+            font-family: 'Sarabun', 'Outfit', sans-serif;
+            background-color: var(--bg-main);
+            background-image: var(--bg-gradient);
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
             align-items: center;
-            padding: 2.5rem 1rem;
+            padding: 2rem 1.5rem;
+            overflow-x: hidden;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem 0.75rem;
+            }
+        }
+
+        /* Ambient Glow Blobs in Background (Premium visual enhancement) */
+        .ambient-blob {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+            z-index: -1;
+            filter: blur(40px);
+            pointer-events: none;
+            animation: floatBlob 20s infinite alternate ease-in-out;
+        }
+        .blob-1 {
+            top: 10%;
+            left: -100px;
+        }
+        .blob-2 {
+            bottom: 10%;
+            right: -100px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, rgba(0, 0, 0, 0) 70%);
+            animation-delay: -5s;
+        }
+
+        @keyframes floatBlob {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(60px, 40px) scale(1.1); }
         }
 
         .container {
             width: 100%;
-            max-width: 800px;
+            max-width: 1200px;
             display: flex;
             flex-direction: column;
-            gap: 1.8rem;
+            gap: 1.5rem;
+            position: relative;
         }
 
+        /* Top Controls and Brand Header */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .college-info {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            box-shadow: var(--shadow);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+        }
+
+        .college-logo-emoji {
+            font-size: 1.2rem;
+            animation: pulse-logo 2s infinite alternate;
+        }
+
+        @keyframes pulse-logo {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.15); }
+        }
+
+        .college-name {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+        }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        @media (max-width: 480px) {
+            .top-bar {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.75rem;
+            }
+            .college-info {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Action Toggles (Theme Mode) */
+        .bar-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-primary);
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            transition: all 0.2s ease;
+        }
+
+        .bar-btn:hover {
+            transform: scale(1.05) translateY(-2px);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            box-shadow: 0 0 15px var(--accent-glow);
+        }
+
+        .bar-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* Header Title Banner */
         header {
             text-align: center;
-            padding: 1rem 0;
+            padding: 1.5rem 0 1rem;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .badge-college {
-            background-color: rgba(99, 102, 241, 0.08);
-            border: 1px solid rgba(99, 102, 241, 0.15);
-            color: var(--accent-color);
-            padding: 0.35rem 1rem;
-            font-size: 0.8rem;
-            border-radius: 50px;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            margin-bottom: 0.5rem;
-            box-shadow: var(--shadow-sm);
-        }
-
         header h1 {
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             font-weight: 800;
-            letter-spacing: -0.03em;
+            letter-spacing: -1px;
             background: var(--accent-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 0.2rem;
+            margin-bottom: 0.1rem;
+            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
         }
 
         header p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
+            color: var(--text-secondary);
+            font-size: 1rem;
             font-weight: 500;
+            line-height: 1.4;
         }
 
-        /* Card Styles */
+        /* Digital Clock */
+        .live-clock-container {
+            margin-top: 0.5rem;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--accent-color);
+            background: rgba(99, 102, 241, 0.06);
+            border: 1px solid rgba(99, 102, 241, 0.12);
+            padding: 0.4rem 1.2rem;
+            border-radius: 30px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .clock-pulse {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            animation: pulse-clock 1s infinite;
+        }
+
+        @keyframes pulse-clock {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+            header p {
+                font-size: 0.9rem;
+            }
+            .live-clock-container {
+                font-size: 0.95rem;
+                padding: 0.3rem 1rem;
+            }
+        }
+
+        /* Main Dashboard Grid Layout */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 1.8rem;
+            width: 100%;
+        }
+
+        @media (max-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.8rem;
+        }
+
+        @media (max-width: 900px) {
+            .column {
+                gap: 1.5rem;
+            }
+        }
+
+        /* Card Component Styling */
         .card {
             background-color: var(--card-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 1.8rem;
-            box-shadow: var(--shadow-md);
-            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-        }
-
-        .card:hover {
-            box-shadow: var(--shadow-lg);
-            border-color: rgba(99, 102, 241, 0.15);
-        }
-
-        .card-title {
-            font-size: 1.15rem;
-            font-weight: 700;
-            margin-bottom: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #0f172a; /* Slate 900 */
-        }
-
-        .form-group {
-            display: flex;
-            gap: 12px;
-            margin-top: 0.5rem;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            background-color: #f8fafc;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 0.9rem 1.2rem;
-            color: var(--text-main);
-            font-size: 0.95rem;
-            font-weight: 500;
-            outline: none;
-            transition: all 0.2s ease;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-        }
-
-        input[type="text"]::placeholder {
-            color: #94a3b8;
-        }
-
-        input[type="text"]:focus {
-            border-color: var(--accent-color);
-            background-color: #ffffff;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
-        }
-
-        button[type="submit"] {
-            background: var(--accent-gradient);
-            border: none;
-            color: white;
-            padding: 0.9rem 2rem;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
-            transition: all 0.2s ease;
-        }
-
-        button[type="submit"]:hover {
-            opacity: 0.95;
-            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
-            transform: translateY(-1px);
-        }
-
-        button[type="submit"]:active {
-            transform: translateY(0);
-        }
-
-        /* Currently Playing Component */
-        .now-playing {
-            display: flex;
-            align-items: center;
-            gap: 1.8rem;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
-            border: 1.5px solid rgba(99, 102, 241, 0.12);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
-        .now-playing::before {
+        .card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
-            width: 4px;
-            height: 100%;
+            right: 0;
+            height: 3px;
+            background: transparent;
+            transition: background 0.3s ease;
+        }
+
+        .card:hover::before {
             background: var(--accent-gradient);
         }
 
+        @media (max-width: 600px) {
+            .card {
+                padding: 1.25rem;
+                border-radius: 20px;
+            }
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-primary);
+        }
+
+        .card-title svg {
+            width: 22px;
+            height: 22px;
+            fill: var(--accent-color);
+        }
+
+        /* Now Playing Card Component */
+        .now-playing-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(17, 22, 37, 0.8) 100%);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            display: flex;
+            flex-direction: row;
+            gap: 2rem;
+            align-items: center;
+            min-height: 160px;
+        }
+
+        @media (max-width: 550px) {
+            .now-playing-card {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 1.2rem;
+                padding: 1.5rem;
+            }
+        }
+
+        /* Rotating Cover Vinyl effect */
+        .cover-art-wrapper {
+            position: relative;
+            flex-shrink: 0;
+            width: 110px;
+            height: 110px;
+        }
+
+        .now-playing-thumb {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid var(--card-bg);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 10px var(--accent-glow);
+            animation: rotateVinyl 25s linear infinite;
+        }
+
+        .vinyl-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 22px;
+            height: 22px;
+            background: var(--bg-main);
+            border: 3px solid var(--accent-color);
+            border-radius: 50%;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+            z-index: 2;
+        }
+
+        @keyframes rotateVinyl {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Equalizer/Visualizer Animation (12 Bars) */
         .visualizer {
             display: flex;
             align-items: flex-end;
-            gap: 4px;
-            width: 32px;
-            height: 32px;
+            gap: 3px;
+            height: 40px;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 550px) {
+            .visualizer {
+                justify-content: center;
+            }
         }
 
         .bar {
-            width: 4px;
-            height: 6px;
-            background-color: var(--accent-color);
-            border-radius: 2px;
-            animation: bounce 0.8s ease infinite alternate;
+            width: 3.5px;
+            height: 4px;
+            background: var(--accent-gradient);
+            border-radius: 5px;
+            animation: bounceBars 0.7s ease infinite alternate;
         }
 
-        .bar:nth-child(2) { animation-delay: 0.2s; height: 14px; }
-        .bar:nth-child(3) { animation-delay: 0.4s; height: 10px; }
-        .bar:nth-child(4) { animation-delay: 0.1s; height: 18px; }
+        /* Add dynamic delay & durations to simulate a realistic audio visualizer */
+        .bar:nth-child(1) { animation-delay: 0.1s; animation-duration: 0.6s; }
+        .bar:nth-child(2) { animation-delay: 0.35s; animation-duration: 0.8s; }
+        .bar:nth-child(3) { animation-delay: 0.15s; animation-duration: 0.5s; }
+        .bar:nth-child(4) { animation-delay: 0.5s; animation-duration: 0.75s; }
+        .bar:nth-child(5) { animation-delay: 0.25s; animation-duration: 0.9s; }
+        .bar:nth-child(6) { animation-delay: 0.45s; animation-duration: 0.65s; }
+        .bar:nth-child(7) { animation-delay: 0.12s; animation-duration: 0.55s; }
+        .bar:nth-child(8) { animation-delay: 0.3s; animation-duration: 0.7s; }
+        .bar:nth-child(9) { animation-delay: 0.05s; animation-duration: 0.85s; }
+        .bar:nth-child(10) { animation-delay: 0.4s; animation-duration: 0.6s; }
+        .bar:nth-child(11) { animation-delay: 0.2s; animation-duration: 0.72s; }
+        .bar:nth-child(12) { animation-delay: 0.32s; animation-duration: 0.58s; }
 
-        @keyframes bounce {
+        @keyframes bounceBars {
             0% { height: 4px; }
-            100% { height: 28px; }
+            100% { height: 35px; }
         }
 
         .song-details {
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 4px;
-        }
-
-        .song-title {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: #0f172a;
-            line-height: 1.4;
+            gap: 0.4rem;
+            min-width: 0;
+            width: 100%;
         }
 
         .song-status {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--success);
             display: flex;
             align-items: center;
             gap: 6px;
-            font-weight: 700;
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 1px;
         }
 
         .pulse {
@@ -249,263 +507,761 @@
             height: 8px;
             background-color: var(--success);
             border-radius: 50%;
-            animation: pulse-animation 1.5s infinite;
+            box-shadow: 0 0 10px var(--success);
+            animation: pulseGlow 1.5s infinite;
         }
 
-        @keyframes pulse-animation {
-            0% { transform: scale(0.9); opacity: 1; }
-            50% { transform: scale(1.4); opacity: 0.5; }
-            100% { transform: scale(0.9); opacity: 1; }
+        @keyframes pulseGlow {
+            0% { transform: scale(0.95); opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1.2); opacity: 0.5; box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
 
-        /* Queue List */
-        .queue-header-row {
+        .song-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.4;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @media (max-width: 600px) {
+            .song-title {
+                font-size: 1.1rem;
+                white-space: normal;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+            }
+        }
+
+        /* Form Controls */
+        .form-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 1.2rem;
+            line-height: 1.5;
+        }
+
+        .form-group-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            color: var(--text-muted);
+            pointer-events: none;
+            width: 20px;
+            height: 20px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 16px;
+            padding: 1.1rem 3.5rem 1.1rem 3rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            outline: none;
+            box-shadow: var(--shadow-inset);
+            transition: all 0.25s ease;
+        }
+
+        input[type="text"]::placeholder {
+            color: var(--text-muted);
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent-color);
+            background-color: var(--input-bg-focus);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+
+        @media (max-width: 480px) {
+            input[type="text"] {
+                padding: 0.9rem 3.2rem 0.9rem 2.6rem;
+                font-size: 0.9rem;
+            }
+            .input-icon {
+                left: 0.8rem;
+                width: 16px;
+                height: 16px;
+            }
+        }
+
+        /* Helper buttons (Clear & Paste) */
+        .input-helper-btn {
+            position: absolute;
+            right: 0.8rem;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.4rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .input-helper-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .input-helper-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        .btn-submit {
+            background: var(--accent-gradient);
+            border: none;
+            color: white;
+            padding: 1.1rem 2rem;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.5);
+            opacity: 0.95;
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .btn-submit svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        @media (max-width: 480px) {
+            .btn-submit {
+                padding: 0.9rem 1.5rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        /* Queue Header Component */
+        .queue-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1.5px solid #f1f5f9;
-            padding-bottom: 0.8rem;
-            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 1rem;
+            margin-bottom: 1.2rem;
         }
 
         .queue-count {
-            background-color: #f1f5f9;
-            color: var(--text-main);
-            padding: 0.2rem 0.6rem;
-            border-radius: 20px;
+            background-color: rgba(99, 102, 241, 0.12);
+            color: var(--accent-color);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
             font-size: 0.8rem;
-            font-weight: 700;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            font-family: 'Outfit', sans-serif;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
         }
 
+        /* Queue Scrollable List container */
         .queue-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 0.8rem;
             max-height: 480px;
             overflow-y: auto;
-            padding-right: 4px;
+            padding-right: 0.4rem;
         }
 
         .queue-list::-webkit-scrollbar {
             width: 6px;
         }
         .queue-list::-webkit-scrollbar-track {
-            background: #f8fafc;
+            background: var(--scrollbar-track);
+            border-radius: 10px;
         }
         .queue-list::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
+            background: var(--scrollbar-thumb);
+            border-radius: 10px;
+        }
+        .queue-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25);
         }
 
+        /* Queue Item Card styling */
         .queue-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0.9rem 1.1rem;
-            background-color: #f8fafc;
-            border: 1px solid #f1f5f9;
-            border-radius: 14px;
-            transition: all 0.2s ease;
+            background-color: var(--item-bg);
+            border: 1px solid var(--item-border);
+            border-radius: 18px;
+            gap: 1rem;
+            transition: all 0.25s ease;
         }
 
         .queue-item:hover {
-            background-color: #ffffff;
-            border-color: #e2e8f0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-            transform: translateX(2px);
+            background-color: var(--item-hover);
+            border-color: rgba(99, 102, 241, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transform: translateX(3px);
+        }
+
+        @media (max-width: 480px) {
+            .queue-item {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.8rem;
+                padding: 1rem;
+            }
+        }
+
+        .item-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .item-thumbnail-wrapper {
+            position: relative;
+            flex-shrink: 0;
+            width: 76px;
+            height: 44px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .item-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .queue-item:hover .item-thumbnail {
+            transform: scale(1.1);
+        }
+
+        /* Queue Index Badge */
+        .queue-index-badge {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            background: rgba(0,0,0,0.75);
+            color: #ffffff;
+            font-size: 0.65rem;
+            font-weight: 800;
+            font-family: 'Outfit', sans-serif;
+            padding: 1px 5px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(2px);
+            z-index: 2;
         }
 
         .item-info {
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 4px;
+            min-width: 0;
+            flex: 1;
         }
 
         .item-title {
-            font-weight: 600;
+            font-weight: 700;
             font-size: 0.95rem;
-            color: #334155;
+            color: var(--text-primary);
             line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: normal;
         }
 
         .item-time {
             font-size: 0.75rem;
-            color: var(--text-muted);
+            color: var(--text-secondary);
             display: flex;
             align-items: center;
             gap: 4px;
         }
 
-        /* Status Badges */
+        .item-time svg {
+            width: 13px;
+            height: 13px;
+            fill: currentColor;
+        }
+
+        .item-right {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 480px) {
+            .item-right {
+                justify-content: flex-end;
+                width: 100%;
+            }
+        }
+
+        /* Glow Badges for States */
         .badge {
             padding: 0.3rem 0.8rem;
             font-size: 0.75rem;
-            border-radius: 8px;
-            font-weight: 700;
-            display: inline-block;
+            border-radius: 10px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .badge-pending {
-            background-color: rgba(245, 158, 11, 0.08);
-            color: #d97706;
+            background-color: var(--warning-glow);
+            color: var(--warning);
             border: 1px solid rgba(245, 158, 11, 0.15);
+            box-shadow: 0 0 10px var(--warning-glow);
         }
 
         .badge-downloading {
-            background-color: rgba(59, 130, 246, 0.08);
-            color: #2563eb;
+            background-color: var(--info-glow);
+            color: var(--info);
             border: 1px solid rgba(59, 130, 246, 0.15);
+            box-shadow: 0 0 10px var(--info-glow);
         }
 
         .badge-ready {
-            background-color: rgba(99, 102, 241, 0.08);
-            color: #4f46e5;
+            background-color: var(--accent-glow);
+            color: #818cf8;
             border: 1px solid rgba(99, 102, 241, 0.15);
+            box-shadow: 0 0 10px var(--accent-glow);
         }
 
         .badge-playing {
-            background-color: rgba(16, 185, 129, 0.08);
-            color: #059669;
+            background-color: var(--success-glow);
+            color: var(--success);
             border: 1px solid rgba(16, 185, 129, 0.15);
+            box-shadow: 0 0 10px var(--success-glow);
+            position: relative;
         }
 
         .empty-state {
             text-align: center;
-            padding: 3rem 1.5rem;
+            padding: 3.5rem 1.5rem;
             color: var(--text-muted);
             font-size: 0.95rem;
             font-weight: 500;
-        }
-
-        /* Thumbnail Styles */
-        .thumbnail {
-            width: 72px;
-            height: 40px;
-            object-fit: cover;
-            border-radius: 6px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border: 1px solid #e2e8f0;
-        }
-
-        .thumbnail-large {
-            width: 120px;
-            height: 68px;
-            object-fit: cover;
-            border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-            border: 1.5px solid #ffffff;
-        }
-
-        /* Action Buttons */
-        .action-buttons {
             display: flex;
-            gap: 6px;
-            margin-left: 12px;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.8rem;
         }
 
-        .action-btn {
-            width: 28px;
-            height: 28px;
-            display: inline-flex;
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            fill: currentColor;
+            opacity: 0.4;
+        }
+
+        /* Floating Toast Alert Banner Component */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 380px;
+            width: calc(100% - 40px);
+        }
+
+        .toast {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            padding: 1rem 1.2rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            transform: translateX(120%);
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+            opacity: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+
+        .toast.toast-success::before { background-color: var(--success); }
+        .toast.toast-error::before { background-color: var(--error); }
+        .toast.toast-info::before { background-color: var(--info); }
+
+        .toast-icon {
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
             align-items: center;
             justify-content: center;
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            color: #475569;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: all 0.15s ease;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
         }
 
-        .action-btn:hover {
-            background: var(--accent-color);
-            border-color: var(--accent-color);
-            color: white;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(99, 102, 241, 0.15);
+        .toast-success .toast-icon { color: var(--success); }
+        .toast-error .toast-icon { color: var(--error); }
+        .toast-info .toast-icon { color: var(--info); }
+
+        .toast-icon svg {
+            width: 100%;
+            height: 100%;
+            fill: currentColor;
         }
 
-        .action-btn.btn-delete:hover {
-            background: #ef4444;
-            border-color: #ef4444;
-            color: white;
-            box-shadow: 0 4px 8px rgba(239, 68, 68, 0.15);
-        }
-
-        .message-box {
-            margin-top: 12px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            padding: 0.6rem 1rem;
-            border-radius: 8px;
-            display: none;
+        .toast-msg {
+            flex: 1;
         }
     </style>
 </head>
 <body>
+    <!-- Ambient Blur Background Blobs -->
+    <div class="ambient-blob blob-1"></div>
+    <div class="ambient-blob blob-2"></div>
+
+    <!-- Toast Notifications Area -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <div class="container">
+        <!-- Top bar containing Logo & Configuration controls -->
+        <div class="top-bar">
+            <div class="college-info">
+                <span class="college-logo-emoji">🏫</span>
+                <span class="college-name">วิทยาลัยเทคนิคเชียงคำ</span>
+            </div>
+            
+            <div class="top-actions">
+                <!-- Theme Toggle Button -->
+                <button class="bar-btn" onclick="toggleTheme()" id="themeBtn" title="สลับโหมดแสง/มืด">
+                    <!-- Sun Icon (shown in dark theme to switch to light) -->
+                    <svg id="sunIcon" viewBox="0 0 24 24"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM6.16 5.1a.75.75 0 011.06 0l1.59 1.59a.75.75 0 11-1.06 1.06L6.16 6.16a.75.75 0 010-1.06zM3 12a.75.75 0 01.75-.75h2.25a.75.75 0 010 1.5H3.75A.75.75 0 013 12zm2.1 5.84a.75.75 0 010 1.06l-1.59 1.59a.75.75 0 11-1.06-1.06l1.59-1.59a.75.75 0 011.06 0zM12 17.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V18a.75.75 0 01.75-.75zm5.84 2.1a.75.75 0 011.06 0l1.59 1.59a.75.75 0 11-1.06 1.06l-1.59-1.59a.75.75 0 010-1.06zM21 12a.75.75 0 01.75-.75h2.25a.75.75 0 010 1.5h-2.25a.75.75 0 01-.75-.75zm-2.1-5.84a.75.75 0 010-1.06l1.59-1.59a.75.75 0 111.06 1.06l-1.59 1.59a.75.75 0 01-1.06 0zM12 7.5a4.5 4.5 0 100 9 4.5 4.5 0 000-9z"/></svg>
+                    <!-- Moon Icon (shown in light theme to switch to dark) -->
+                    <svg id="moonIcon" viewBox="0 0 24 24" style="display:none;"><path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clip-rule="evenodd"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Title header -->
         <header>
-            <div class="badge-college">🏫 วิทยาลัยเทคนิคเชียงคำ</div>
             <h1>ระบบเปิดเพลงเทคนิคอัตโนมัติ</h1>
-            <p>ระบบควบคุมและแสดงรายการต่อคิวเปิดเพลงเสียงตามสาย</p>
+            <p>ระบบควบคุมและแสดงรายการคิวเพลงสำหรับการเปิดเพลงเสียงตามสาย</p>
+            
+            <!-- Real-time Clock display -->
+            <div class="live-clock-container">
+                <span class="clock-pulse"></span>
+                <span id="liveTime">00:00:00</span>
+                <span style="font-size: 0.8rem; opacity:0.75; font-weight:500;" id="liveDate">...</span>
+            </div>
         </header>
 
-        <!-- Section: Currently Playing -->
-        <div id="nowPlayingCard" class="card now-playing" style="display: none;">
-            <img id="nowPlayingThumb" class="thumbnail-large" src="" alt="cover">
-            <div class="visualizer">
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-            </div>
-            <div class="song-details">
-                <div class="song-status">
-                    <span class="pulse"></span> กำลังเล่นอยู่ในขณะนี้
-                </div>
-                <div id="nowPlayingTitle" class="song-title">โหลดข้อมูลชื่อเพลง...</div>
-            </div>
-        </div>
-
-        <!-- Section: Add Song Form -->
-        <div class="card">
-            <h3 class="card-title">🎵 เพิ่มเพลงใหม่เข้าสู่คิว</h3>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-                รองรับลิงก์ YouTube (เช่น https://www.youtube.com/watch?v=...) หรือกรอก รหัสคลิปวิดีโอ 11 หลัก
-            </p>
+        <!-- Two Column Responsive Dashboard Grid -->
+        <div class="dashboard-grid">
             
-            <form id="addSongForm" onsubmit="addSong(event)">
-                <div class="form-group">
-                    <input type="text" id="youtubeUrl" placeholder="วางลิงก์ YouTube หรือ รหัสคลิปวิดีโอ..." required autocomplete="off">
-                    <button type="submit">เพิ่มเข้าคิว</button>
+            <!-- LEFT COLUMN: Player & Input Form -->
+            <div class="column">
+                
+                <!-- Component: Currently Playing (Now Playing) -->
+                <div id="nowPlayingCard" class="card now-playing-card" style="display: none;">
+                    <div class="cover-art-wrapper">
+                        <div class="vinyl-center"></div>
+                        <img id="nowPlayingThumb" class="now-playing-thumb" src="" alt="Album cover art">
+                    </div>
+                    
+                    <div class="song-details">
+                        <div class="song-status">
+                            <span class="pulse"></span> กำลังเล่นอยู่ในขณะนี้
+                        </div>
+                        <div id="nowPlayingTitle" class="song-title">โหลดข้อมูลชื่อเพลง...</div>
+                        
+                        <!-- Premium 12-bar Visualizer Waveform -->
+                        <div class="visualizer">
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                        </div>
+                    </div>
                 </div>
-            </form>
-            <div id="message" class="message-box"></div>
-        </div>
 
-        <!-- Section: Playback Queue -->
-        <div class="card">
-            <div class="queue-header-row">
-                <h3 class="card-title" style="margin-bottom: 0;">📋 ลำดับคิวรอเล่นเพลง</h3>
-                <span class="queue-count" id="queueCount">0 เพลง</span>
+                <!-- Component: Form to Add New Song to Queue -->
+                <div class="card">
+                    <h3 class="card-title">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+                        ขอเพลงใหม่เข้าสู่คิว
+                    </h3>
+                    <p class="form-desc">
+                        วางที่อยู่ลิงก์ YouTube (เช่น https://www.youtube.com/watch?v=...) หรือกรอกรหัสวิดีโอ 11 หลักลงในกล่องข้อความด้านล่าง เพื่อนำเข้าคิวประมวลผลเปิดเสียงตามสายของวิทยาลัย
+                    </p>
+                    
+                    <form id="addSongForm" onsubmit="addSong(event)">
+                        <div class="form-group-wrapper">
+                            <div class="input-container">
+                                <!-- Input decoration icon -->
+                                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3zM9 10a3 3 0 0 0-3 3v5a3 3 0 0 0 3 3 3 3 0 0 0 3-3v-5a3 3 0 0 0-3-3z"/></svg>
+                                
+                                <input type="text" id="youtubeUrl" placeholder="วางลิงก์ YouTube หรือรหัสวิดีโอที่นี่..." required autocomplete="off">
+                                
+                                <!-- Quick helpers inside input field -->
+                                <button type="button" class="input-helper-btn" id="clearInputBtn" onclick="clearInput()" title="ล้างข้อความ" style="display:none; right: 2.8rem;">
+                                    <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                                </button>
+                                <button type="button" class="input-helper-btn" onclick="pasteFromClipboard()" title="วางจากคลิปบอร์ด">
+                                    <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                                </button>
+                            </div>
+                            
+                            <button type="submit" class="btn-submit">
+                                <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                                เพิ่มเข้าสู่ลำดับคิว
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-            
-            <div class="queue-list" id="queueList">
-                <div class="empty-state">ไม่มีเพลงรอเล่นในคิวขณะนี้</div>
+
+            <!-- RIGHT COLUMN: Interactive Queue -->
+            <div class="column">
+                <!-- Component: Playback Queue list -->
+                <div class="card" style="flex: 1;">
+                    <div class="queue-header">
+                        <h3 class="card-title" style="margin-bottom:0;">
+                            <svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0-2-.9-2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+                            ลำดับเพลงรอการเล่น
+                        </h3>
+                        <span class="queue-count" id="queueCount">0 เพลง</span>
+                    </div>
+                    
+                    <!-- Dynamic List of Songs in Queue -->
+                    <div class="queue-list" id="queueList">
+                        <div class="empty-state">
+                            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 16h-2v-2h2v2zm0-4h-2V7h2v7z"/></svg>
+                            ไม่มีเพลงรอเล่นในคิวขณะนี้
+                        </div>
+                    </div>
+                </div>
             </div>
+
         </div>
     </div>
 
     <script>
         const API_URL = 'https://yuroweb.com/webapi/cktc-g';
+        let currentTheme = 'dark';
 
+        // Initialize App: Theme setting, start Live Clock and fetch data
+        window.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            updateClock();
+            setInterval(updateClock, 1000);
+            
+            // Listen for input changes to show/hide the clear button
+            const inputField = document.getElementById('youtubeUrl');
+            const clearBtn = document.getElementById('clearInputBtn');
+            inputField.addEventListener('input', () => {
+                clearBtn.style.display = inputField.value ? 'block' : 'none';
+            });
+
+            // Initial fetch
+            fetchQueue();
+            // Poll every 2.5 seconds (avoid server flood, keeps active sync)
+            setInterval(fetchQueue, 2500);
+        });
+
+        // Theme switching handler
+        function initTheme() {
+            const savedTheme = localStorage.getItem('music-dashboard-theme');
+            if (savedTheme) {
+                currentTheme = savedTheme;
+            } else {
+                // Media query detection
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                currentTheme = prefersDark ? 'dark' : 'light';
+            }
+            applyTheme(currentTheme);
+        }
+
+        // Apply visual theme settings
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            const sunIcon = document.getElementById('sunIcon');
+            const moonIcon = document.getElementById('moonIcon');
+            
+            if (theme === 'dark') {
+                sunIcon.style.display = 'block';
+                moonIcon.style.display = 'none';
+            } else {
+                sunIcon.style.display = 'none';
+                moonIcon.style.display = 'block';
+            }
+        }
+
+        // Switch color theme
+        function toggleTheme() {
+            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('music-dashboard-theme', currentTheme);
+            applyTheme(currentTheme);
+            showToast(currentTheme === 'dark' ? 'เปลี่ยนเป็นธีมมืดแล้ว' : 'เปลี่ยนเป็นธีมสว่างแล้ว', 'info');
+        }
+
+        // Live Clock helper
+        function updateClock() {
+            const now = new Date();
+            
+            // Format time HH:MM:SS
+            const timeStr = now.toLocaleTimeString('th-TH', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit', 
+                hour12: false 
+            });
+            document.getElementById('liveTime').textContent = timeStr;
+
+            // Format Thai Date
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dateStr = now.toLocaleDateString('th-TH', options);
+            document.getElementById('liveDate').textContent = dateStr;
+        }
+
+        // Clipboard Paste Helper
+        async function pasteFromClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                const inputField = document.getElementById('youtubeUrl');
+                inputField.value = text.trim();
+                document.getElementById('clearInputBtn').style.display = 'block';
+                showToast('วางที่อยู่ลิงก์เรียบร้อย', 'info');
+            } catch (err) {
+                // Clipboard permission blocked, normal fallback notification
+                showToast('กรุณากดคลิกขวา หรือ CTRL+V เพื่อวางข้อมูล', 'info');
+            }
+        }
+
+        // Clear user text input helper
+        function clearInput() {
+            const inputField = document.getElementById('youtubeUrl');
+            inputField.value = '';
+            document.getElementById('clearInputBtn').style.display = 'none';
+            inputField.focus();
+        }
+
+        // Floating Toast Alerts Builder
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            // Icons based on toast types
+            let iconSvg = '';
+            if (type === 'success') {
+                iconSvg = '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>';
+            } else if (type === 'error') {
+                iconSvg = '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v7z"/></svg>';
+            } else {
+                iconSvg = '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 11h-2V7h2v6zm0 4h-2v-2h2v2z"/></svg>';
+            }
+
+            toast.innerHTML = `
+                <div class="toast-icon">${iconSvg}</div>
+                <div class="toast-msg">${message}</div>
+            `;
+            
+            container.appendChild(toast);
+            
+            // Trigger animation in
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            // Autohide after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // Fetch queue data from backend API
         async function fetchQueue() {
             try {
                 const response = await fetch(`${API_URL}/queue`);
-                const queue = await response.json();
+                if (!response.ok) throw new Error('API request failed');
                 
+                const queue = await response.json();
                 updateNowPlaying(queue);
                 updateQueueList(queue);
             } catch (err) {
@@ -513,6 +1269,7 @@
             }
         }
 
+        // Render current playing song card
         function updateNowPlaying(queue) {
             const nowPlayingCard = document.getElementById('nowPlayingCard');
             const nowPlayingTitle = document.getElementById('nowPlayingTitle');
@@ -521,20 +1278,48 @@
             const currentSong = queue.find(item => item.status === 'playing');
             
             if (currentSong) {
-                // Use actual title if present, fallback to videoId
-                nowPlayingTitle.textContent = currentSong.title || currentSong.videoId;
+                const titleStr = currentSong.title || currentSong.videoId;
+                nowPlayingTitle.textContent = titleStr;
+                nowPlayingTitle.title = titleStr;
                 nowPlayingThumb.src = `https://img.youtube.com/vi/${currentSong.videoId}/mqdefault.jpg`;
-                nowPlayingCard.style.display = 'flex';
+                
+                if (nowPlayingCard.style.display === 'none') {
+                    nowPlayingCard.style.display = 'flex';
+                    nowPlayingCard.style.animation = 'fadeIn 0.4s ease forwards';
+                }
             } else {
                 nowPlayingCard.style.display = 'none';
             }
         }
 
+        // Format Relative Time added
+        function getRelativeTimeString(dateString) {
+            const addedDate = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - addedDate;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+
+            if (isNaN(addedDate.getTime())) return '';
+            
+            const timeStr = addedDate.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+            
+            if (diffMins < 1) {
+                return `เมื่อสักครู่ (${timeStr})`;
+            } else if (diffMins < 60) {
+                return `เมื่อ ${diffMins} นาทีที่แล้ว (${timeStr})`;
+            } else if (diffHours < 12) {
+                return `เมื่อ ${diffHours} ชม. ที่แล้ว (${timeStr})`;
+            } else {
+                return `วันนี้เมื่อ ${timeStr}`;
+            }
+        }
+
+        // Render entire wait queue list
         function updateQueueList(queue) {
             const queueList = document.getElementById('queueList');
             const queueCount = document.getElementById('queueCount');
             
-            // Map queue to include original 1-based index and filter active items (not played)
             const activeQueue = queue
                 .map((item, idx) => ({ ...item, originalIndex: idx + 1 }))
                 .filter(item => item.status !== 'played');
@@ -542,16 +1327,19 @@
             queueCount.textContent = `${activeQueue.length} เพลง`;
 
             if (activeQueue.length === 0) {
-                queueList.innerHTML = '<div class="empty-state">ไม่มีเพลงรอเล่นในคิวขณะนี้</div>';
+                queueList.innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 16h-2v-2h2v2zm0-4h-2V7h2v7z"/></svg>
+                        ไม่มีเพลงรอเล่นในคิวขณะนี้
+                    </div>`;
                 return;
             }
 
-            // Reverse activeQueue to display newest on top (newest additions at the top of Dashboard)
             const displayQueue = activeQueue.slice().reverse();
 
             let html = '';
             displayQueue.forEach((item) => {
-                const timeStr = new Date(item.addedAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const relativeTime = getRelativeTimeString(item.addedAt);
                 
                 let badgeClass = 'badge-pending';
                 let statusLabel = 'รอประมวลผล';
@@ -567,23 +1355,26 @@
                     statusLabel = 'กำลังเล่น';
                 }
 
-                // Use actual title, fallback to videoId
                 const songTitle = item.title || item.videoId;
 
                 html += `
-                    <div class="queue-item">
-                        <div style="display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 0;">
-                            <img class="thumbnail" src="https://img.youtube.com/vi/${item.videoId}/mqdefault.jpg" alt="cover">
-                            <div class="item-info" style="min-width: 0; flex: 1;">
-                                <div class="item-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${songTitle}">
-                                    #${item.originalIndex} - ${songTitle}
+                    <div class="queue-item" data-id="${item.id}">
+                        <div class="item-left">
+                            <div class="item-thumbnail-wrapper">
+                                <span class="queue-index-badge">#${item.originalIndex}</span>
+                                <img class="item-thumbnail" src="https://img.youtube.com/vi/${item.videoId}/mqdefault.jpg" alt="Video cover thumbnail">
+                            </div>
+                            <div class="item-info">
+                                <div class="item-title" title="${songTitle}">
+                                    ${songTitle}
                                 </div>
                                 <div class="item-time">
-                                    🕒 เพิ่มเมื่อ: ${timeStr}
+                                    <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+                                    ${relativeTime}
                                 </div>
                             </div>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;">
+                        <div class="item-right">
                             <span class="badge ${badgeClass}">${statusLabel}</span>
                         </div>
                     </div>
@@ -593,6 +1384,7 @@
             queueList.innerHTML = html;
         }
 
+        // Add song submission API
         async function addSong(e) {
             e.preventDefault();
             const input = document.getElementById('youtubeUrl');
@@ -610,72 +1402,18 @@
                 const data = await response.json();
                 
                 if (response.ok) {
-                    showStatusMessage('เพิ่มเข้าคิวสำเร็จ!', 'rgba(16, 185, 129, 0.1)', 'var(--success)', '1px solid rgba(16, 185, 129, 0.2)');
+                    showToast('เพิ่มเข้าคิวสำเร็จ!', 'success');
                     input.value = '';
+                    document.getElementById('clearInputBtn').style.display = 'none';
                     fetchQueue();
                 } else {
-                    showStatusMessage(data.error || 'เกิดข้อผิดพลาด', 'rgba(239, 68, 68, 0.1)', '#ef4444', '1px solid rgba(239, 68, 68, 0.2)');
+                    showToast(data.error || 'เกิดข้อผิดพลาดในการเพิ่มคิว', 'error');
                 }
             } catch (err) {
-                showStatusMessage('ไม่สามารถติดต่อเซิร์ฟเวอร์ได้', 'rgba(239, 68, 68, 0.1)', '#ef4444', '1px solid rgba(239, 68, 68, 0.2)');
+                showToast('ไม่สามารถเชื่อมต่อเครื่องเซิร์ฟเวอร์ได้', 'error');
                 console.error(err);
             }
         }
-
-        async function moveQueue(id, action) {
-            try {
-                const response = await fetch(`${API_URL}/queue/move`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id, action })
-                });
-                if (response.ok) {
-                    fetchQueue();
-                } else {
-                    const data = await response.json();
-                    alert(data.error || 'ไม่สามารถย้ายคิวได้');
-                }
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        async function deleteQueue(id) {
-            if (!confirm('คุณต้องการลบเพลงนี้ออกจากคิวใช่หรือไม่?')) return;
-            try {
-                const response = await fetch(`${API_URL}/queue/delete`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id })
-                });
-                if (response.ok) {
-                    fetchQueue();
-                } else {
-                    alert('ไม่สามารถลบคิวได้');
-                }
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        function showStatusMessage(text, bgColor, textColor, borderStyle) {
-            const messageDiv = document.getElementById('message');
-            messageDiv.textContent = text;
-            messageDiv.style.backgroundColor = bgColor;
-            messageDiv.style.color = textColor;
-            messageDiv.style.border = borderStyle;
-            messageDiv.style.display = 'block';
-            
-            setTimeout(() => {
-                messageDiv.style.display = 'none';
-            }, 3000);
-        }
-
-        // Poll every 2.5 seconds (reduced slightly to avoid flooding)
-        setInterval(fetchQueue, 2500);
-        
-        // Initial fetch
-        fetchQueue();
     </script>
 </body>
 </html>
