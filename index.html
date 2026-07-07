@@ -10,6 +10,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
+    <!-- SweetAlert2 Script -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
         :root {
             /* Clean Premium Light Theme (Single Theme) */
@@ -54,6 +57,11 @@
 
         button, input[type="text"], .input-helper-btn {
             touch-action: manipulation;
+        }
+
+        .swal2-popup {
+            font-family: 'Sarabun', 'Outfit', sans-serif !important;
+            border-radius: 16px !important;
         }
 
         body {
@@ -745,100 +753,9 @@
             opacity: 0.4;
         }
 
-        /* Floating Toast Alert Banner Component */
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-width: 360px;
-            width: calc(100% - 40px);
-        }
-
-        .toast {
-            background: #ffffff;
-            border: 1px solid var(--card-border);
-            padding: 0.9rem 1.1rem;
-            border-radius: 12px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--text-primary);
-            font-size: 0.85rem;
-            font-weight: 600;
-            transform: translateX(120%);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.15), opacity 0.25s;
-            opacity: 0;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .toast.show {
-            transform: translateX(0);
-            opacity: 1;
-        }
-
-        .toast::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-        }
-
-        .toast.toast-success::before { background-color: var(--success); }
-        .toast.toast-error::before { background-color: var(--error); }
-        .toast.toast-info::before { background-color: var(--info); }
-
-        .toast-icon {
-            flex-shrink: 0;
-            width: 18px;
-            height: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .toast-success .toast-icon { color: var(--success); }
-        .toast-error .toast-icon { color: var(--error); }
-        .toast-info .toast-icon { color: var(--info); }
-
-        .toast-icon svg {
-            width: 100%;
-            height: 100%;
-            fill: currentColor;
-        }
-
-        .toast-msg {
-            flex: 1;
-        }
-
-        @media (max-width: 600px) {
-            .toast-container {
-                top: 16px;
-                left: 16px;
-                right: 16px;
-                width: auto;
-                max-width: none;
-            }
-            .toast {
-                transform: translateY(-100px);
-            }
-            .toast.show {
-                transform: translateY(0);
-            }
-        }
     </style>
 </head>
 <body>
-    <!-- Toast Notifications Area -->
-    <div class="toast-container" id="toastContainer"></div>
-
     <div class="container">
         <!-- Top bar containing Logo -->
         <div class="top-bar">
@@ -898,7 +815,7 @@
                         ขอเพลงใหม่เข้าสู่คิว
                     </h3>
                     <p class="form-desc">
-                        วางที่อยู่ลิงก์ YouTube (เช่น https://www.youtube.com/watch?v=...) หรือกรอกรหัสวิดีโอ 11 หลักด้านล่าง เพื่อเพิ่มคิวเพลงเข้าสู่ระบบของวิทยาลัย
+                        ใส่ลิงก์เพลงใน YouTube ที่มีความยาวไม่เกิน 6 นาที
                     </p>
                     
                     <form id="addSongForm" onsubmit="addSong(event)">
@@ -907,7 +824,7 @@
                                 <!-- Input decoration icon -->
                                 <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3zM9 10a3 3 0 0 0-3 3v5a3 3 0 0 0 3 3 3 3 0 0 0 3-3v-5a3 3 0 0 0-3-3z"/></svg>
                                 
-                                <input type="text" id="youtubeUrl" placeholder="วางลิงก์ YouTube หรือรหัสวิดีโอที่นี่..." required autocomplete="off">
+                                <input type="text" id="youtubeUrl" placeholder="ใส่ลิงก์เพลงใน YouTube ที่ความยาวไม่เกิน 6 นาที..." required autocomplete="off">
                                 
                                 <!-- Quick helpers inside input field -->
                                 <button type="button" class="input-helper-btn" id="clearInputBtn" onclick="clearInput()" title="ล้างข้อความ" style="display:none; right: 2.8rem;">
@@ -1013,41 +930,24 @@
             inputField.focus();
         }
 
-        // Floating Toast Alerts Builder
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            
-            let iconSvg = '';
-            if (type === 'success') {
-                iconSvg = '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>';
-            } else if (type === 'error') {
-                iconSvg = '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v7z"/></svg>';
-            } else {
-                iconSvg = '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 11h-2V7h2v6zm0 4h-2v-2h2v2z"/></svg>';
+        // Floating Toast Alerts Builder using SweetAlert2
+        const SwalToast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
             }
+        });
 
-            toast.innerHTML = `
-                <div class="toast-icon">${iconSvg}</div>
-                <div class="toast-msg">${message}</div>
-            `;
-            
-            container.appendChild(toast);
-            
-            // Trigger slide animation
-            setTimeout(() => {
-                toast.classList.add('show');
-            }, 10);
-            
-            // Autohide after 3 seconds
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => {
-                    toast.remove();
-                }, 300);
-            }, 3000);
+        function showToast(message, type = 'info') {
+            SwalToast.fire({
+                icon: type, // 'success', 'error', 'info', 'warning'
+                title: message
+            });
         }
 
         // Fetch queue data from backend API
