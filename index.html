@@ -870,9 +870,54 @@
 
     <script>
         const API_URL = 'https://yuroweb.com/webapi/cktc-g';
+        const WS_URL = 'wss://yuroweb.com/webapi/chtc-g/wss';
         let previousQueueJson = '';
+        let ws;
 
-        // Initialize App: Live Clock, input listener and active data fetching
+        function connectWS() {
+            ws = new WebSocket(WS_URL);
+
+            ws.onopen = () => {
+                console.log('Connected to WebSocket server');
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const msg = JSON.parse(event.data);
+                    if (msg.type === 'init') {
+                        if (msg.queue) {
+                            const queueJson = JSON.stringify(msg.queue);
+                            if (queueJson !== previousQueueJson) {
+                                previousQueueJson = queueJson;
+                                updateNowPlaying(msg.queue);
+                                updateQueueList(msg.queue);
+                            }
+                        }
+                    } else if (msg.type === 'queue') {
+                        const queueJson = JSON.stringify(msg.data);
+                        if (queueJson !== previousQueueJson) {
+                            previousQueueJson = queueJson;
+                            updateNowPlaying(msg.data);
+                            updateQueueList(msg.data);
+                        }
+                    }
+                } catch (err) {
+                    console.error('Error parsing WS message:', err);
+                }
+            };
+
+            ws.onclose = () => {
+                console.log('WS disconnected. Reconnecting in 5 seconds...');
+                setTimeout(connectWS, 5000);
+            };
+
+            ws.onerror = (err) => {
+                console.error('WS error:', err);
+                ws.close();
+            };
+        }
+
+        // Initialize App: Live Clock, input listener and WS connection
         window.addEventListener('DOMContentLoaded', () => {
             updateClock();
             setInterval(updateClock, 1000);
@@ -883,10 +928,8 @@
                 clearBtn.style.display = inputField.value ? 'block' : 'none';
             });
 
-            // Initial fetch
-            fetchQueue();
-            // Polling interval (2.5 seconds sync)
-            setInterval(fetchQueue, 2500);
+            // Start WS connection for real-time updates
+            connectWS();
         });
 
         // Live Clock calculations
